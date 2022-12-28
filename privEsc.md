@@ -3,7 +3,7 @@
 > ## **Sudo - Shell Escape Sequences**
 >
 > command `sudo -l`  
-> Visit [GTFOBins](https://gtfobins.github.io/) Search result: search for some of the program names. If the program is listed with "sudo" as a function, you can use it to elevate privileges, usually via an escape sequence.
+> Visit [GTFOBins](https://gtfobins.github.io/) and search for some of the program names. If the program is listed with "sudo" as a function, you can use it to elevate privileges, usually via an escape sequence.
 
 > ## **SUID (Set-user Identification)**
 >
@@ -80,7 +80,7 @@ chmod +xs /tmp/rootbash
 
 > ## **NFS (Network File Sharing)**
 >
-> configuration is kept in the /etc/exports file. This file is created during the NFS server installation and can usually be read by users.  
+> configuration is kept in the _/etc/exports_ file. This file is created during the NFS server installation and can usually be read by users.  
 >  _command_ `cat /etc/exports`  
 >  The critical element for this privilege escalation vector is the “no_root_squash”. By default, NFS will change the root user to nfsnobody and strip any file from operating with root privileges. If the “no_root_squash” option is present on a writable share, we can create an executable with SUID bit set and run it on the target system.  
 >  We will start by enumerating mountable shares from our attacking machine: `showmount -e 10.10.10.10`  
@@ -101,3 +101,10 @@ int main()
 >  `chmod +s nfs`  
 >  `ls -l nfs`  
 >  `./nfs`
+
+> ## **Python**
+
+```sh
+python3 -c 'import pty;pty.spawn("/bin/bash")
+export TERM=xterm
+```
