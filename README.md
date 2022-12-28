@@ -1,7 +1,5 @@
 # Privilege Escalation for Linux (Cheat-Sheet)
 
-# _Privilege Escalation for Linux (Cheat-Sheet)_
-
 > ## **Sudo - Shell Escape Sequences**
 >
 > command `sudo -l`  
