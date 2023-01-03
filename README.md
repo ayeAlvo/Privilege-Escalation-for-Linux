@@ -78,6 +78,17 @@ chmod +xs /tmp/rootbash
 > Edit the /etc/shadow file and replace the original root user's password hash with the one you just generated.  
 > Switch to the root user, using the new password.
 
+> ## **Passwords & Keys - SSH Keys**
+>
+> Look for hidden files & directories in the system root:
+> `ls -la /`
+> hidden directory
+> `ls -l /.ssh`
+> Tenga en cuenta que hay un archivo de lectura mundial llamado _root_key_. Una inspección más profunda de este archivo debería indicar que es una clave SSH privada. El nombre del archivo sugiere que es para el usuario root.  
+> Copie la clave en su cuadro de Kali (es más fácil simplemente ver el contenido del archivo _root_key_ y copiar/pegar la clave) y darle los permisos correctos, de lo contrario, su cliente SSH se negará a usarlo:  
+> `chmod 600 root_key`  
+> `ssh -i root_key root@MACHINE_IP`
+
 > ## **NFS (Network File Sharing)**
 >
 > configuration is kept in the _/etc/exports_ file. This file is created during the NFS server installation and can usually be read by users.  
